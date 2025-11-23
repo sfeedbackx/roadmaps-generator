@@ -1,0 +1,13 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[codz]
+*$py.class
+
+#env
+.env
+.venv/
+venv/
+env/
+# jupyter
+.ipynb_checkpoints/
+*.ipynb_checkpoints
