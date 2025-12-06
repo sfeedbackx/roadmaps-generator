@@ -1,10 +1,11 @@
-from dotenv import dotenv_values
+from dotenv import dotenv_values, load_dotenv
 import sys
 import os
 script_path = os.path.dirname(os.path.abspath(__file__))
 project_root = os.path.dirname(os.path.dirname(script_path))
 env_path = os.path.join(project_root, '.env')
 config = dotenv_values(env_path)
+load_dotenv(env_path)
 
 
 def get_env_var(key):
@@ -20,4 +21,4 @@ if __name__ == '__main__':
     if arg is None:
         print("usage : python config.py key ")
         sys.exit(1)
-    print(get_env_var(arg))
+    print(os.getenv(arg))

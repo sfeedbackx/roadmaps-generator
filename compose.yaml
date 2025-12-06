@@ -1,0 +1,16 @@
+# named volume 'roadmap' is marked as "external" (used by service 'postgres'), so either remove "external" from volume definition or it needs to be created using: docker volume create roadmap
+#version: "2.4"
+services:
+    postgres:
+        volumes:
+            - roadmap:/var/lib/postgres
+        container_name: roadmap-gen
+        ports:
+            - 5432:5432
+        environment:
+            - POSTGRES_PASSWORD=prisma
+            - POSTGRES_USER=prisma
+            - POSTGRES_DB=roadmap
+        image: postgres:16.9-alpine
+volumes:
+    roadmap:

@@ -1,0 +1,46 @@
+datasource db {
+  // could be postgresql or mysql
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator db {
+  provider             = "prisma-client-py"
+  interface            = "asyncio"
+  recursive_type_depth = 5
+}
+
+model Skill {
+  id         String   @id @default(cuid())
+  parent_topic Topic  @relation(fields: [parent_topic_id], references: [id])
+  parent_topic_id String
+  title      String
+  subtopic String
+  description String
+  duration Int
+  study_hours_per_day Int
+  technologie String
+  parent_technology String
+  skill_type StepType @default(REQUIRED)
+  free_resources Json?
+  paid_resources Json?
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  
+}
+enum StepType {
+  REQUIRED 
+  ALTERNATIVE
+  OPTIONAL
+}
+
+model Topic {
+  id         String   @id @default(cuid())
+  title      String
+  steps  Skill[]
+  subtopics String[]
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+}
