@@ -1,5 +1,4 @@
 datasource db {
-  // could be postgresql or mysql
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
@@ -11,36 +10,106 @@ generator db {
 }
 
 model Skill {
-  id         String   @id @default(cuid())
-  parent_topic Topic  @relation(fields: [parent_topic_id], references: [id])
-  parent_topic_id String
-  title      String
-  subtopic String
-  description String
-  duration Int
-  study_hours_per_day Int
-  technologie String
-  parent_technology String
-  skill_type StepType @default(REQUIRED)
-  free_resources Json?
-  paid_resources Json?
-  created_at DateTime @default(now())
-  updated_at DateTime @updatedAt
+  id                   String                 @id @default(cuid())
+  topic                Topic                  @relation(fields: [topic_id], references: [id])
+  topic_id             String
+  title                String
+  description          String
+  duration             Int
+  score                Float
+  study_hours_per_day  Int
+  skill_type           SkillTypeEnum          @default(REQUIRED)
+  technologie          String[]
+  free_resources       Json?
+  paid_resources       Json?
+  prerequisites        PrerequisiteForSkill[] @relation("SkillPrerequisites")
+  requiredBy           PrerequisiteForSkill[] @relation("PrerequisiteSkill")
+  created_at           DateTime               @default(now())
+  updated_at           DateTime               @updatedAt
 
-  
+  @@index([topic_id])
 }
-enum StepType {
-  REQUIRED 
-  ALTERNATIVE
+
+model PrerequisiteForSkill {
+  skill           Skill         @relation("SkillPrerequisites", fields: [skill_id], references: [id])
+  skill_id        String
+  prerequisite    Skill         @relation("PrerequisiteSkill", fields: [prerequisite_id], references: [id])
+  prerequisite_id String
+  importance      SkillTypeEnum @default(REQUIRED)
+  assignedAt      DateTime      @default(now())
+
+  @@id([skill_id, prerequisite_id])
+  @@index([prerequisite_id])
+}
+
+enum SkillTypeEnum {
+  REQUIRED
+  RECOMMENDED
   OPTIONAL
 }
 
 model Topic {
+  id               String   @id @default(cuid())
+  title            String
+  depth            Int
+  parent_topic     Topic?   @relation("TopicHierarchy", fields: [parent_topic_id], references: [id])
+  parent_topic_id  String?
+  child_topics     Topic[]  @relation("TopicHierarchy")
+  skills           Skill[]
+  created_at       DateTime @default(now())
+  updated_at       DateTime @updatedAt
+
+  @@index([parent_topic_id])
+  @@index([depth])
+  @@index([title])
+}
+
+model Step {
+  id                   String        @id @default(cuid())
+  roadmap              Roadmap       @relation("RoadmapSkills", fields: [roadmap_id], references: [id])
+  roadmap_id           String
+  step_number          Int
+  title                String
+  technologies         String[]
+  duration_hours       Float
+  prerequisites        String[]
+  difficulty_level     Float
+  study_hours_per_day  Int
+  description          String
+  step_type            SkillTypeEnum @default(REQUIRED)
+  free_resources       Json?
+  paid_resources       Json?
+  created_at           DateTime      @default(now())
+  updated_at           DateTime      @updatedAt
+
+  @@index([roadmap_id])
+  @@index([step_number])
+  @@index([roadmap_id, step_number])
+}
+
+model Roadmap {
   id         String   @id @default(cuid())
-  title      String
-  steps  Skill[]
-  subtopics String[]
+  user       User     @relation("UserRoadmap", fields: [user_id], references: [id])
+  user_id    String
+  steps      Step[]   @relation("RoadmapSkills")
+  topic      String
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
 
+  @@index([user_id])
+  @@index([topic])
+}
+
+model User {
+  id           String     @id @default(cuid())
+  roadmaps     Roadmap[]  @relation("UserRoadmap")
+  first_name   String
+  last_name    String
+  email        String     @unique
+  password     String
+  phone_number String
+  created_at   DateTime   @default(now())
+  updated_at   DateTime   @updatedAt
+
+  @@index([email])
 }
